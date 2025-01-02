@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $HOME/dbshell/.env
+source $HOME/db_cli_tools/.env
 
 select_db() {
     echo "-----------------------------------"
