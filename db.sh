@@ -44,7 +44,7 @@ while true; do
 
     case $choosen_db in
         clickhouse)
-            clickhouse-client --config-file "${HOME}/.clickhouse-client/config_${choosen_env}.yml"
+            clickhouse-client "${!connection_var}"
             ;;
         postgres)
             psql "${!connection_var}"
