@@ -44,7 +44,7 @@ while true; do
 
     case $choosen_db in
         clickhouse)
-            clickhouse-client "${!connection_var}"
+            clickhouse client "${!connection_var}"
             ;;
         postgres)
             psql "${!connection_var}"
