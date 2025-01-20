@@ -1,4 +1,5 @@
 #!/bin/bash
+# db_cli_tools interactive DB connector
 
 source $HOME/db_cli_tools/.env
 
@@ -22,6 +23,16 @@ select_env() {
     echo -n "Enter your choice [1-3]: "
 }
 
+select_cluster() {
+    echo "-----------------------------------"
+    echo "    Cluster select"
+    echo "-----------------------------------"
+    echo "1) Main"
+    echo "2) Analytics"
+    echo "3) Api"
+    echo -n "Enter your choice [1-3]: "
+}
+
 while true; do
     select_db
     read db
@@ -40,11 +51,21 @@ while true; do
     else exit 0
     fi
 
+    if [ $db -eq 1 ]; then
+      select_cluster
+      read cluster
+      if [ $cluster -eq 1 ]; then choosen_cluster="9000"
+      elif [ $cluster -eq 2 ]; then choosen_cluster="9001"
+      elif [ $cluster -eq 3 ]; then choosen_cluster="9002"
+      else exit 0
+      fi
+    fi
+
     connection_var="${choosen_db}_${choosen_env}"
 
     case $choosen_db in
         clickhouse)
-            clickhouse client "${!connection_var}"
+            clickhouse client "${!connection_var}":$choosen_cluster
             ;;
         postgres)
             psql "${!connection_var}"
