@@ -65,7 +65,7 @@ while true; do
 
     case $choosen_db in
         clickhouse)
-            clickhouse client "${!connection_var}":$choosen_cluster
+            clickhouse client "${!connection_var}":$choosen_cluster -f PrettyCompactNoEscapes
             ;;
         postgres)
             psql "${!connection_var}"
