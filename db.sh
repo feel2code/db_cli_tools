@@ -36,14 +36,15 @@ select_cluster() {
 while true; do
     select_db
     read db
-    select_env
-    read env
 
     if [ $db -eq 1 ]; then choosen_db="clickhouse"
     elif [ $db -eq 2 ]; then choosen_db="postgres"
     elif [ $db -eq 3 ]; then choosen_db="mongo"
     else exit 0
     fi
+
+    select_env
+    read env
 
     if [ $env -eq 1 ]; then choosen_env="integration"
     elif [ $env -eq 2 ]; then choosen_env="staging"
