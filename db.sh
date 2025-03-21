@@ -10,7 +10,9 @@ select_db() {
     echo "1) ClickHouse"
     echo "2) Postgres"
     echo "3) Mongo"
-    echo -n "Enter your choice [1-3]: "
+    echo "4) MySQL int"
+    echo "5) MySQL ext"
+    echo -n "Enter your choice [1-5]: "
 }
 
 select_env() {
@@ -40,6 +42,8 @@ while true; do
     if [ $db -eq 1 ]; then choosen_db="clickhouse"
     elif [ $db -eq 2 ]; then choosen_db="postgres"
     elif [ $db -eq 3 ]; then choosen_db="mongo"
+    elif [ $db -eq 4 ]; then choosen_db="mysql_int"
+    elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
     else exit 0
     fi
 
@@ -69,10 +73,16 @@ while true; do
             clickhouse client "${!connection_var}":$choosen_cluster -f PrettyCompactNoEscapes
             ;;
         postgres)
-            psql "${!connection_var}"
+            pgcli "${!connection_var}"
             ;;
         mongo)
             mongosh "${!connection_var}"
+            ;;
+        mysql_int)
+            mycli "${!connection_var}"
+            ;;
+        mysql_ext)
+            mycli "${!connection_var}"
             ;;
     esac
 
