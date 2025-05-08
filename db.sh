@@ -70,7 +70,7 @@ while true; do
 
     case $choosen_db in
         clickhouse)
-            clickhouse client "${!connection_var}":$choosen_cluster -f PrettyCompactNoEscapes
+            clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
             ;;
         postgres)
             pgcli "${!connection_var}"
