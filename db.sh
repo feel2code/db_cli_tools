@@ -1,6 +1,23 @@
 #!/bin/bash
 # db_cli_tools interactive DB connector
 
+show_help() {
+    echo "Usage: ./db.sh"
+    echo
+    echo "This interactive script integrates several db cli tools into one."
+    echo
+    echo "Options:"
+    echo "  --help      Show this help message"
+    echo
+    echo "You can also add <alias db=\"bash ~/db_cli_tools/db.sh\"> to your shell rc file (e.g. .bashrc) to run this script from anywhere."
+    echo
+}
+
+if [[ "$1" == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
 source $HOME/db_cli_tools/.env
 
 select_db() {

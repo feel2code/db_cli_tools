@@ -16,9 +16,9 @@ git clone https://github.com/feel2code/db_cli_tools.git
 `Alt (Option) + #` - comment line.
 `Ctrl + r` - fuzzy history search.
 
-## Usage (under development)
+## Usage
 ```bash
-db_cli_tools --help
+./db.sh --help
 ```
 
 ## License
