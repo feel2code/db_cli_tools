@@ -29,6 +29,7 @@ select_db() {
     echo "3) Mongo"
     echo "4) MySQL int"
     echo "5) MySQL ext"
+    echo "6) SQLite"
     echo -n "Enter your choice [1-5]: "
 }
 
@@ -61,6 +62,7 @@ while true; do
     elif [ $db -eq 3 ]; then choosen_db="mongo"
     elif [ $db -eq 4 ]; then choosen_db="mysql_int"
     elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
+    elif [ $db -eq 6 ]; then choosen_db="sqlite"
     else exit 0
     fi
 
@@ -100,6 +102,9 @@ while true; do
             ;;
         mysql_ext)
             mycli "${!connection_var}"
+            ;;
+        sqlite)
+            litecli "${!connection_var}"
             ;;
     esac
 
