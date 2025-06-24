@@ -1,6 +1,12 @@
 #!/bin/bash
 # db_cli_tools interactive DB connector
 
+# colors setup
+RD='\033[0;31m'
+GR='\033[0;32m'
+NC='\033[0m'
+
+# functions def
 show_help() {
     echo "Usage: ./db.sh"
     echo
@@ -18,41 +24,43 @@ if [[ "$1" == "--help" ]]; then
     exit 0
 fi
 
+# sourcing for creds
 source $HOME/db_cli_tools/.env
 
 select_db() {
-    echo "-----------------------------------"
-    echo "    DB interactive shell"
-    echo "-----------------------------------"
+    echo -e "${GR}-----------------------------------"
+    echo -e "    DB interactive shell"
+    echo -e "-----------------------------------${NC}"
     echo "1) ClickHouse"
     echo "2) Postgres"
     echo "3) Mongo"
     echo "4) MySQL int"
     echo "5) MySQL ext"
     echo "6) SQLite"
-    echo -n "Enter your choice [1-5]: "
+    echo -ne "${RD}Enter your choice [1-5]: ${NC}"
 }
 
 select_env() {
-    echo "-----------------------------------"
-    echo "    Env select"
-    echo "-----------------------------------"
+    echo -e "${GR}-----------------------------------"
+    echo -e "    Env select"
+    echo -e "-----------------------------------${NC}"
     echo "1) Integration"
     echo "2) Staging"
     echo "3) Production"
-    echo -n "Enter your choice [1-3]: "
+    echo -ne "${RD}Enter your choice [1-3]: ${NC}"
 }
 
 select_cluster() {
-    echo "-----------------------------------"
+    echo -e "${GR}-----------------------------------"
     echo "    Cluster select"
-    echo "-----------------------------------"
+    echo -e "-----------------------------------${NC}"
     echo "1) Main"
     echo "2) Analytics"
     echo "3) Api"
-    echo -n "Enter your choice [1-3]: "
+    echo -ne "${RD}Enter your choice [1-3]: ${NC}"
 }
 
+# main
 while true; do
     select_db
     read db
