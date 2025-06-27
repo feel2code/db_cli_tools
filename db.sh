@@ -2,9 +2,10 @@
 # db_cli_tools interactive DB connector
 
 # colors setup
-RD='\033[0;31m'
-GR='\033[0;32m'
-NC='\033[0m'
+RD='\e[31m'
+GR='\e[32m'
+BLD='\e[1m'
+NC='\e[0m'
 
 # functions def
 show_help() {
@@ -27,9 +28,18 @@ fi
 # sourcing for creds
 source $HOME/db_cli_tools/.env
 
+eof_check() {
+    local __resultvar=$1
+    if ! read input; then
+        echo "Exiting... Bye! 🙌"
+        exit 0
+    fi
+    printf -v "$__resultvar" '%s' "$input"
+}
+
 select_db() {
     echo -e "${GR}-----------------------------------"
-    echo -e "    DB interactive shell"
+    echo -e "    DB interactive shell 🔥"
     echo -e "-----------------------------------${NC}"
     echo "1) ClickHouse"
     echo "2) Postgres"
@@ -37,81 +47,139 @@ select_db() {
     echo "4) MySQL int"
     echo "5) MySQL ext"
     echo "6) SQLite"
-    echo -ne "${RD}Enter your choice [1-5]: ${NC}"
+    echo -ne "${GR}Enter your choice [1-5]: ${NC}"
+    eof_check db
 }
+
 
 select_env() {
     echo -e "${GR}-----------------------------------"
-    echo -e "    Env select"
+    echo -e "    Env select ✨"
     echo -e "-----------------------------------${NC}"
     echo "1) Integration"
     echo "2) Staging"
     echo "3) Production"
-    echo -ne "${RD}Enter your choice [1-3]: ${NC}"
+    echo -ne "${GR}Enter your choice [1-3]: ${NC}"
+    eof_check env
 }
+
 
 select_cluster() {
     echo -e "${GR}-----------------------------------"
-    echo "    Cluster select"
+    echo "    Cluster select ⚡️"
     echo -e "-----------------------------------${NC}"
     echo "1) Main"
     echo "2) Analytics"
     echo "3) Api"
-    echo -ne "${RD}Enter your choice [1-3]: ${NC}"
+    echo -ne "${GR}Enter your choice [1-3]: ${NC}"
+    eof_check cluster
 }
+
+invalid_choice() {
+    echo -e "${RD}${BLD}Invalid choice, please try again. 🥲${NC}"
+}
+
 
 # main
 while true; do
-    select_db
-    read db
+    while true; do
+        select_db
+        if [ $db -eq 1 ]; then choosen_db="clickhouse"
+        elif [ $db -eq 2 ]; then choosen_db="postgres"
+        elif [ $db -eq 3 ]; then choosen_db="mongo"
+        elif [ $db -eq 4 ]; then choosen_db="mysql_int"
+        elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
+        elif [ $db -eq 6 ]; then choosen_db="sqlite"
+        else 
+            invalid_choice
+            continue
+        fi
+        break
+    done
 
-    if [ $db -eq 1 ]; then choosen_db="clickhouse"
-    elif [ $db -eq 2 ]; then choosen_db="postgres"
-    elif [ $db -eq 3 ]; then choosen_db="mongo"
-    elif [ $db -eq 4 ]; then choosen_db="mysql_int"
-    elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
-    elif [ $db -eq 6 ]; then choosen_db="sqlite"
-    else exit 0
-    fi
+    while true; do
+        select_env
+        if [ $env -eq 1 ]; then choosen_env="integration"
+        elif [ $env -eq 2 ]; then choosen_env="staging"
+        elif [ $env -eq 3 ]; then choosen_env="production"
+        else 
+            invalid_choice
+            continue
+        fi
+        break
+    done
 
-    select_env
-    read env
-
-    if [ $env -eq 1 ]; then choosen_env="integration"
-    elif [ $env -eq 2 ]; then choosen_env="staging"
-    elif [ $env -eq 3 ]; then choosen_env="production"
-    else exit 0
-    fi
-
-    if [ $db -eq 1 ]; then
-      select_cluster
-      read cluster
-      if [ $cluster -eq 1 ]; then choosen_cluster="9000"
-      elif [ $cluster -eq 2 ]; then choosen_cluster="9001"
-      elif [ $cluster -eq 3 ]; then choosen_cluster="9002"
-      else exit 0
-      fi
-    fi
+    while true; do
+        if [ $db -eq 1 ]; then
+          select_cluster
+          if [ $cluster -eq 1 ]; then choosen_cluster="9000"
+          elif [ $cluster -eq 2 ]; then choosen_cluster="9001"
+          elif [ $cluster -eq 3 ]; then choosen_cluster="9002"
+          else 
+            invalid_choice
+            continue
+          fi
+          break
+        fi
+        break
+    done
 
     connection_var="${choosen_db}_${choosen_env}"
 
+    declare -A cluster_name_map=(
+        [9000]="main"
+        [9001]="analytics"
+        [9002]="api"
+    )
+
+    clear
     case $choosen_db in
         clickhouse)
+            echo -e "${GR}Connecting to ClickHouse ${choosen_env}, cluster ${cluster_name_map[${choosen_cluster}]}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env} ${cluster_name_map[$choosen_cluster]}\007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}.${cluster_name_map[$choosen_cluster]}"
+            fi
             clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
             ;;
         postgres)
+            echo -e "${GR}Connecting to Postgres ${choosen_env}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env}\007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}"
+            fi
             pgcli "${!connection_var}"
             ;;
         mongo)
+            echo -e "${GR}Connecting to MongoDB ${choosen_env}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}"
+            fi
             mongosh "${!connection_var}"
             ;;
         mysql_int)
+            echo -e "${GR}Connecting to MySQL internal ${choosen_env}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}"
+            fi
             mycli "${!connection_var}"
             ;;
         mysql_ext)
+            echo -e "${GR}Connecting to MySQL external ${choosen_env}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}"
+            fi
             mycli "${!connection_var}"
             ;;
         sqlite)
+            echo -e "${GR}Connecting to SQLite ${choosen_env}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}"
+            fi
             litecli "${!connection_var}"
             ;;
     esac
