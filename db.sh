@@ -2,10 +2,10 @@
 # db_cli_tools interactive DB connector
 
 # colors setup
-RD='\e[31m'
-GR='\e[32m'
-BLD='\e[1m'
-NC='\e[0m'
+RD='\033[31m'
+GR='\033[32m'
+BLD='\033[1m'
+NC='\033[0m'
 
 # functions def
 show_help() {
