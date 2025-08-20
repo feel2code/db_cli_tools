@@ -47,7 +47,7 @@ select_db() {
     echo "4) MySQL int"
     echo "5) MySQL ext"
     echo "6) SQLite"
-    echo -ne "${GR}Enter your choice [1-5]: ${NC}"
+    echo -ne "${GR}Enter your choice [1-6]: ${NC}"
     eof_check db
 }
 
@@ -59,7 +59,8 @@ select_env() {
     echo "1) Integration"
     echo "2) Staging"
     echo "3) Production"
-    echo -ne "${GR}Enter your choice [1-3]: ${NC}"
+    echo "4) AWS"
+    echo -ne "${GR}Enter your choice [1-4]: ${NC}"
     eof_check env
 }
 
@@ -71,7 +72,8 @@ select_cluster() {
     echo "1) Main"
     echo "2) Analytics"
     echo "3) Api"
-    echo -ne "${GR}Enter your choice [1-3]: ${NC}"
+    echo "4) AWS"
+    echo -ne "${GR}Enter your choice [1-4]: ${NC}"
     eof_check cluster
 }
 
@@ -102,6 +104,7 @@ while true; do
         if [ $env -eq 1 ]; then choosen_env="integration"
         elif [ $env -eq 2 ]; then choosen_env="staging"
         elif [ $env -eq 3 ]; then choosen_env="production"
+        elif [ $env -eq 4 ]; then choosen_env="aws"
         else 
             invalid_choice
             continue
@@ -115,6 +118,7 @@ while true; do
           if [ $cluster -eq 1 ]; then choosen_cluster="9000"
           elif [ $cluster -eq 2 ]; then choosen_cluster="9001"
           elif [ $cluster -eq 3 ]; then choosen_cluster="9002"
+          elif [ $cluster -eq 4 ]; then choosen_cluster="9440"
           else 
             invalid_choice
             continue
@@ -130,6 +134,7 @@ while true; do
         [9000]="main"
         [9001]="analytics"
         [9002]="api"
+        [9440]="aws"
     )
 
     clear
@@ -140,7 +145,13 @@ while true; do
             if [ -n "$TMUX" ]; then
                 tmux rename-window "${choosen_db}.${choosen_env}.${cluster_name_map[$choosen_cluster]}"
             fi
-            clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
+			if [ $choosen_cluster -eq 9440 ]; then
+				connection_value="${!connection_var}"
+				connection_array=($connection_value)
+				clickhouse client "${connection_array[@]}"
+		    else
+				clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
+		    fi
             ;;
         postgres)
             echo -e "${GR}Connecting to Postgres ${choosen_env}...${NC}"
