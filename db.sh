@@ -1,5 +1,13 @@
 #!/bin/bash
 # db_cli_tools interactive DB connector
+set -e
+
+original_window_name=$(tmux display-message -p '#{window_name}')
+
+cleanup() {
+    tmux rename-window "$original_window_name"
+}
+trap cleanup EXIT
 
 # colors setup
 RD='\033[31m'
