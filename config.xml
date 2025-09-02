@@ -1,0 +1,11 @@
+<config>
+    <secure>1</secure>
+    <host></host>
+    <port>9440</port>
+    <user></user>
+    <password></password>
+    <ssl>
+			<caConfig>/etc/ssl/certs/ca-certificates.crt </caConfig>
+        <verificationMode>strict</verificationMode>
+    </ssl>
+</config>
