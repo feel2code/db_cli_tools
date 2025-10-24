@@ -50,11 +50,12 @@ select_db() {
     echo -e "    DB interactive shell 🔥"
     echo -e "-----------------------------------${NC}"
     echo "1) ClickHouse"
-    echo "2) Postgres"
-    echo "3) Mongo"
-    echo "4) MySQL int"
-    echo "5) MySQL ext"
-    echo "6) SQLite"
+    echo "2) ClickHouse AWS"
+    echo "3) Postgres"
+    echo "4) Mongo"
+    echo "5) MySQL int"
+    echo "6) MySQL ext"
+    echo "7) SQLite"
     echo -ne "${GR}Enter your choice [1-6]: ${NC}"
     eof_check db
 }
@@ -67,7 +68,6 @@ select_env() {
     echo "1) Integration"
     echo "2) Staging"
     echo "3) Production"
-    echo "4) AWS"
     echo -ne "${GR}Enter your choice [1-4]: ${NC}"
     eof_check env
 }
@@ -80,7 +80,6 @@ select_cluster() {
     echo "1) Main"
     echo "2) Analytics"
     echo "3) Api"
-    echo "4) AWS"
     echo -ne "${GR}Enter your choice [1-4]: ${NC}"
     eof_check cluster
 }
@@ -95,11 +94,12 @@ while true; do
     while true; do
         select_db
         if [ $db -eq 1 ]; then choosen_db="clickhouse"
-        elif [ $db -eq 2 ]; then choosen_db="postgres"
-        elif [ $db -eq 3 ]; then choosen_db="mongo"
-        elif [ $db -eq 4 ]; then choosen_db="mysql_int"
-        elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
-        elif [ $db -eq 6 ]; then choosen_db="sqlite"
+        elif [ $db -eq 2 ]; then choosen_db="aws"
+        elif [ $db -eq 3 ]; then choosen_db="postgres"
+        elif [ $db -eq 4 ]; then choosen_db="mongo"
+        elif [ $db -eq 5 ]; then choosen_db="mysql_int"
+        elif [ $db -eq 6 ]; then choosen_db="mysql_ext"
+        elif [ $db -eq 7 ]; then choosen_db="sqlite"
         else 
             invalid_choice
             continue
@@ -112,7 +112,6 @@ while true; do
         if [ $env -eq 1 ]; then choosen_env="integration"
         elif [ $env -eq 2 ]; then choosen_env="staging"
         elif [ $env -eq 3 ]; then choosen_env="production"
-        elif [ $env -eq 4 ]; then choosen_env="aws"
         else 
             invalid_choice
             continue
@@ -126,12 +125,13 @@ while true; do
           if [ $cluster -eq 1 ]; then choosen_cluster="9000"
           elif [ $cluster -eq 2 ]; then choosen_cluster="9001"
           elif [ $cluster -eq 3 ]; then choosen_cluster="9002"
-          elif [ $cluster -eq 4 ]; then choosen_cluster="9440"
           else 
             invalid_choice
             continue
           fi
           break
+        elif [ $db -eq 2 ]; then
+          choosen_cluster="9440"
         fi
         break
     done
@@ -142,7 +142,6 @@ while true; do
         [9000]="main"
         [9001]="analytics"
         [9002]="api"
-        [9440]="aws"
     )
 
     clear
@@ -160,6 +159,16 @@ while true; do
 		    else
 				clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
 		    fi
+            ;;
+        aws)
+            echo -e "${GR}Connecting to ClickHouse AWS ${choosen_env}...${NC}"
+            echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
+            if [ -n "$TMUX" ]; then
+                tmux rename-window "${choosen_db}.${choosen_env}"
+            fi
+            connection_value="${!connection_var}"
+            connection_array=($connection_value)
+            clickhouse client "${connection_array[@]}"
             ;;
         postgres)
             echo -e "${GR}Connecting to Postgres ${choosen_env}...${NC}"
