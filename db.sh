@@ -168,7 +168,7 @@ while true; do
             fi
             connection_value="${!connection_var}"
             connection_array=($connection_value)
-            clickhouse client "${connection_array[@]}"
+            clickhouse client "${connection_array[@]}" -f PrettySpaceNoEscapes
             ;;
         postgres)
             echo -e "${GR}Connecting to Postgres ${choosen_env}...${NC}"
