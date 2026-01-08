@@ -131,12 +131,21 @@ while true; do
           fi
           break
         elif [ $db -eq 2 ]; then
-          choosen_cluster="9440"
+          select_cluster
+          if [ $cluster -eq 1 ]; then choosen_cluster="main"
+          elif [ $cluster -eq 2 ]; then choosen_cluster="analytics"
+          elif [ $cluster -eq 3 ]; then choosen_cluster="api"
+          else 
+            invalid_choice
+            continue
+          fi
+          break
         fi
         break
     done
 
     connection_var="${choosen_db}_${choosen_env}"
+    connection_full_var="${choosen_db}_${choosen_env}_${choosen_cluster}"
 
     declare -A cluster_name_map=(
         [9000]="main"
@@ -152,21 +161,15 @@ while true; do
             if [ -n "$TMUX" ]; then
                 tmux rename-window "${choosen_db}.${choosen_env}.${cluster_name_map[$choosen_cluster]}"
             fi
-			if [ $choosen_cluster -eq 9440 ]; then
-				connection_value="${!connection_var}"
-				connection_array=($connection_value)
-				clickhouse client "${connection_array[@]}"
-		    else
-				clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
-		    fi
+            clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
             ;;
         aws)
-            echo -e "${GR}Connecting to ClickHouse AWS ${choosen_env}...${NC}"
+            echo -e "${GR}Connecting to ClickHouse AWS ${choosen_env}, cluster ${choosen_cluster}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}"
+                tmux rename-window "${choosen_db}.${choosen_env}.${choosen_cluster}"
             fi
-            connection_value="${!connection_var}"
+            connection_value="${!connection_full_var}"
             connection_array=($connection_value)
             clickhouse client "${connection_array[@]}" -f PrettySpaceNoEscapes
             ;;
