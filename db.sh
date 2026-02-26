@@ -2,6 +2,8 @@
 # db_cli_tools interactive DB connector
 set -e
 
+VERSION="1.0.0"
+
 original_window_name=$(tmux display-message -p '#{window_name}')
 
 cleanup() {
@@ -23,6 +25,7 @@ show_help() {
     echo
     echo "Options:"
     echo "  --help      Show this help message"
+    echo "  --version   Show version of the script"
     echo
     echo "You can also add <alias db=\"bash ~/db_cli_tools/db.sh\"> to your shell rc file (e.g. .bashrc) to run this script from anywhere."
     echo
@@ -30,6 +33,11 @@ show_help() {
 
 if [[ "$1" == "--help" ]]; then
     show_help
+    exit 0
+fi
+
+if [[ "$1" == "--version" ]]; then
+    echo "db_cli_tools version $VERSION"
     exit 0
 fi
 
@@ -50,12 +58,11 @@ select_db() {
     echo -e "    DB interactive shell 🔥"
     echo -e "-----------------------------------${NC}"
     echo "1) ClickHouse"
-    echo "2) ClickHouse AWS"
-    echo "3) Postgres"
-    echo "4) Mongo"
-    echo "5) MySQL int"
-    echo "6) MySQL ext"
-    echo "7) SQLite"
+    echo "2) Postgres"
+    echo "3) Mongo"
+    echo "4) MySQL int"
+    echo "5) MySQL ext"
+    echo "6) SQLite"
     echo -ne "${GR}Enter your choice [1-6]: ${NC}"
     eof_check db
 }
@@ -68,7 +75,7 @@ select_env() {
     echo "1) Integration"
     echo "2) Staging"
     echo "3) Production"
-    echo -ne "${GR}Enter your choice [1-4]: ${NC}"
+    echo -ne "${GR}Enter your choice [1-3]: ${NC}"
     eof_check env
 }
 
@@ -78,9 +85,8 @@ select_cluster() {
     echo "    Cluster select ⚡️"
     echo -e "-----------------------------------${NC}"
     echo "1) Main"
-    echo "2) Analytics"
-    echo "3) Api"
-    echo -ne "${GR}Enter your choice [1-4]: ${NC}"
+    echo "2) Api"
+    echo -ne "${GR}Enter your choice [1-2]: ${NC}"
     eof_check cluster
 }
 
@@ -94,12 +100,11 @@ while true; do
     while true; do
         select_db
         if [ $db -eq 1 ]; then choosen_db="clickhouse"
-        elif [ $db -eq 2 ]; then choosen_db="aws"
-        elif [ $db -eq 3 ]; then choosen_db="postgres"
-        elif [ $db -eq 4 ]; then choosen_db="mongo"
-        elif [ $db -eq 5 ]; then choosen_db="mysql_int"
-        elif [ $db -eq 6 ]; then choosen_db="mysql_ext"
-        elif [ $db -eq 7 ]; then choosen_db="sqlite"
+        elif [ $db -eq 2 ]; then choosen_db="postgres"
+        elif [ $db -eq 3 ]; then choosen_db="mongo"
+        elif [ $db -eq 4 ]; then choosen_db="mysql_int"
+        elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
+        elif [ $db -eq 6 ]; then choosen_db="sqlite"
         else 
             invalid_choice
             continue
@@ -122,19 +127,8 @@ while true; do
     while true; do
         if [ $db -eq 1 ]; then
           select_cluster
-          if [ $cluster -eq 1 ]; then choosen_cluster="9000"
-          elif [ $cluster -eq 2 ]; then choosen_cluster="9001"
-          elif [ $cluster -eq 3 ]; then choosen_cluster="9002"
-          else 
-            invalid_choice
-            continue
-          fi
-          break
-        elif [ $db -eq 2 ]; then
-          select_cluster
           if [ $cluster -eq 1 ]; then choosen_cluster="main"
-          elif [ $cluster -eq 2 ]; then choosen_cluster="analytics"
-          elif [ $cluster -eq 3 ]; then choosen_cluster="api"
+          elif [ $cluster -eq 2 ]; then choosen_cluster="api"
           else 
             invalid_choice
             continue
@@ -147,31 +141,15 @@ while true; do
     connection_var="${choosen_db}_${choosen_env}"
     connection_full_var="${choosen_db}_${choosen_env}_${choosen_cluster}"
 
-    declare -A cluster_name_map=(
-        [9000]="main"
-        [9001]="analytics"
-        [9002]="api"
-    )
-
     clear
     case $choosen_db in
         clickhouse)
-            echo -e "${GR}Connecting to ClickHouse ${choosen_env}, cluster ${cluster_name_map[${choosen_cluster}]}...${NC}"
-            echo -ne "\033]0;${choosen_db} ${choosen_env} ${cluster_name_map[$choosen_cluster]}\007"
-            if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}.${cluster_name_map[$choosen_cluster]}"
-            fi
-            clickhouse client "${!connection_var}":$choosen_cluster -f PrettySpaceNoEscapes
-            ;;
-        aws)
-            echo -e "${GR}Connecting to ClickHouse AWS ${choosen_env}, cluster ${choosen_cluster}...${NC}"
+            echo -e "${GR}Connecting to ClickHouse ${choosen_env}, cluster ${choosen_cluster}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
                 tmux rename-window "${choosen_db}.${choosen_env}.${choosen_cluster}"
             fi
-            connection_value="${!connection_full_var}"
-            connection_array=($connection_value)
-            clickhouse client "${connection_array[@]}" -f PrettySpaceNoEscapes
+            clickhouse-cli ${!connection_full_var}
             ;;
         postgres)
             echo -e "${GR}Connecting to Postgres ${choosen_env}...${NC}"
@@ -188,14 +166,6 @@ while true; do
                 tmux rename-window "${choosen_db}.${choosen_env}"
             fi
             mongosh "${!connection_var}"
-            ;;
-        mysql_int)
-            echo -e "${GR}Connecting to MySQL internal ${choosen_env}...${NC}"
-            echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
-            if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}"
-            fi
-            mycli "${!connection_var}"
             ;;
         mysql_ext)
             echo -e "${GR}Connecting to MySQL external ${choosen_env}...${NC}"

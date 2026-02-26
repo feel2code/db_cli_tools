@@ -1,3 +1,6 @@
+// This is schema analyzer for MongoDB. It samples documents from a specified collection to determine the field names and their corresponding data types.
+// The output includes the total count of documents and a list of fields with their types, as the feature in MongoDB Compass.
+//
 // Set your collection name
 const collectionName = "collection"; // Replace with your collection name
 
