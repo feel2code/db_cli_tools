@@ -4,10 +4,14 @@ set -e
 
 VERSION="1.0.0"
 
-original_window_name=$(tmux display-message -p '#{window_name}')
+if [ -n "$TMUX" ]; then
+    original_window_name=$(tmux display-message -p '#{window_name}')
+fi
 
 cleanup() {
-    tmux rename-window "$original_window_name"
+    if [ -n "$TMUX" ]; then
+        tmux rename-window "$original_window_name"
+    fi
 }
 trap cleanup EXIT
 
