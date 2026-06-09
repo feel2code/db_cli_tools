@@ -64,9 +64,8 @@ select_db() {
     echo "1) ClickHouse"
     echo "2) Postgres"
     echo "3) Mongo"
-    echo "4) MySQL int"
-    echo "5) MySQL ext"
-    echo "6) SQLite"
+    echo "4) MySQL"
+    echo "5) SQLite"
     echo -ne "${GR}Enter your choice [1-6]: ${NC}"
     eof_check db
 }
@@ -106,9 +105,8 @@ while true; do
         if [ $db -eq 1 ]; then choosen_db="clickhouse"
         elif [ $db -eq 2 ]; then choosen_db="postgres"
         elif [ $db -eq 3 ]; then choosen_db="mongo"
-        elif [ $db -eq 4 ]; then choosen_db="mysql_int"
-        elif [ $db -eq 5 ]; then choosen_db="mysql_ext"
-        elif [ $db -eq 6 ]; then choosen_db="sqlite"
+        elif [ $db -eq 4 ]; then choosen_db="mysql"
+        elif [ $db -eq 5 ]; then choosen_db="sqlite"
         else 
             invalid_choice
             continue
@@ -171,7 +169,7 @@ while true; do
             fi
             mongosh "${!connection_var}"
             ;;
-        mysql_ext)
+        mysql)
             echo -e "${GR}Connecting to MySQL external ${choosen_env}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
