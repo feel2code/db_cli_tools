@@ -149,7 +149,7 @@ while true; do
             echo -e "${GR}Connecting to ClickHouse ${choosen_env}, cluster ${choosen_cluster}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}.${choosen_cluster}"
+                tmux rename-window "${choosen_db}-${choosen_env}-${choosen_cluster}"
             fi
             clickhouse-cli ${!connection_full_var}
             ;;
@@ -157,7 +157,7 @@ while true; do
             echo -e "${GR}Connecting to Postgres ${choosen_env}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env}\007"
             if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}"
+                tmux rename-window "${choosen_db}-${choosen_env}"
             fi
             pgcli "${!connection_var}"
             ;;
@@ -165,7 +165,7 @@ while true; do
             echo -e "${GR}Connecting to MongoDB ${choosen_env}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}"
+                tmux rename-window "${choosen_db}-${choosen_env}"
             fi
             mongosh "${!connection_var}"
             ;;
@@ -173,7 +173,7 @@ while true; do
             echo -e "${GR}Connecting to MySQL external ${choosen_env}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}"
+                tmux rename-window "${choosen_db}-${choosen_env}"
             fi
             mycli "${!connection_var}"
             ;;
@@ -181,7 +181,7 @@ while true; do
             echo -e "${GR}Connecting to SQLite ${choosen_env}...${NC}"
             echo -ne "\033]0;${choosen_db} ${choosen_env} \007"
             if [ -n "$TMUX" ]; then
-                tmux rename-window "${choosen_db}.${choosen_env}"
+                tmux rename-window "${choosen_db}-${choosen_env}"
             fi
             litecli "${!connection_var}"
             ;;
